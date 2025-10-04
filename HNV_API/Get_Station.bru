@@ -1,0 +1,30 @@
+meta {
+  name: Get_Station
+  type: http
+  seq: 2
+}
+
+get {
+  url: https://www3.vvs.de/mnghnv/XML_DM_REQUEST?SpEncId=0&coordOutputFormat=EPSG:4326&deleteAssignedStops=1&limit=5&macroWebDep=true&mode=direct&name_dm=de:08121:8192:0:7&outputFormat=rapidJSON&serverInfo=1&type_dm=any&useRealtime=1&version=10.2.10.139
+  body: none
+  auth: inherit
+}
+
+params:query {
+  SpEncId: 0
+  coordOutputFormat: EPSG:4326
+  deleteAssignedStops: 1
+  limit: 5
+  macroWebDep: true
+  mode: direct
+  name_dm: de:08121:8192:0:7
+  outputFormat: rapidJSON
+  serverInfo: 1
+  type_dm: any
+  useRealtime: 1
+  version: 10.2.10.139
+}
+
+settings {
+  encodeUrl: true
+}

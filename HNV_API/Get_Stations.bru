@@ -1,0 +1,27 @@
+meta {
+  name: Get_Stations
+  type: http
+  seq: 3
+}
+
+get {
+  url: https://www3.vvs.de/mnghnv/XML_GEOOBJECT_REQUEST?SpEncId=0&coordOutputFormat=EPSG:4326&line=hnv:30001:E:H:j25:6&outputFormat=rapidJSON&serverInfo=1&spTZO=1&stFaZon=1&vSL=1&version=10.2.10.139
+  body: none
+  auth: inherit
+}
+
+params:query {
+  SpEncId: 0
+  coordOutputFormat: EPSG:4326
+  line: hnv:30001:E:H:j25:6
+  outputFormat: rapidJSON
+  serverInfo: 1
+  spTZO: 1
+  stFaZon: 1
+  vSL: 1
+  version: 10.2.10.139
+}
+
+settings {
+  encodeUrl: true
+}

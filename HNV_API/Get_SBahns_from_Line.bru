@@ -1,0 +1,24 @@
+meta {
+  name: Get_SBahns_from_Line
+  type: http
+  seq: 4
+}
+
+get {
+  url: https://www3.vvs.de/mnghnv/VELOC?CoordSystem=WGS84&LineID=j25-hnv-100S4-R-&SpEncId=0&coordOutputFormat=EPSG:4326&outputFormat=rapidJSON&serverInfo=1
+  body: none
+  auth: inherit
+}
+
+params:query {
+  CoordSystem: WGS84
+  LineID: j25-hnv-100S4-R-
+  SpEncId: 0
+  coordOutputFormat: EPSG:4326
+  outputFormat: rapidJSON
+  serverInfo: 1
+}
+
+settings {
+  encodeUrl: true
+}
