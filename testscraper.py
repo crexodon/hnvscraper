@@ -42,16 +42,15 @@ timetable_params = dict(
 
 stop_reg = re.compile(r'^.*?(?=#)')
 
-conn = sqlite3.connect('testdb.db')
+conn = sqlite3.connect('testdb2.db')
 
 def create_database():
-    conn = sqlite3.connect('testdb.db')
     c = conn.cursor()
 
-    c.execute('''CREATE TABLE IF NOT EXISTS busses (
+    c.execute('''CREATE TABLE IF NOT EXISTS vehicles (
                  id INTEGER PRIMARY KEY AUTOINCREMENT,
                  line_id TEXT,
-                 bus_id TEXT,
+                 trip_id TEXT,
                  get_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                  bus_timestamp TIMESTAMP,
                  latitude TEXT,
@@ -92,7 +91,6 @@ def create_database():
     #              hints TEXT)''')
     # conn.commit()
 
-    conn.close()
 
 # Line ID has a :6 at the end!
 def get_stations(station_line):
@@ -115,7 +113,8 @@ def get_stations(station_line):
             stop_id = station['parent']['properties']['stopId'],
             validity_from = data['transportations'][0]['properties']['validity']['from'],
             validity_to = data['transportations'][0]['properties']['validity']['to'],
-            line_id = data['transportations'][0]['id'] 
+            #line_id = data['transportations'][0]['id']
+            line_id = station_line
         ) 
 
         c = conn.cursor()
@@ -193,6 +192,7 @@ def transform_lineid(line_str):
     
     return None
 
+# TODO use TripID instead of bus/vehicle id as it seems to change randomly
 def scrape(vehicle_line):
     vehicle_params['LineID'] = transform_lineid(vehicle_line)
     vehicle_params_str = urllib.parse.urlencode(vehicle_params, safe=':')
@@ -207,7 +207,7 @@ def scrape(vehicle_line):
 
         vec_parse = dict(
             line_id = vehicle_line,
-            bus_id = vec['ID'],
+            trip_id = vec['JourneyIdentifier'],
             bus_timestamp = vec['Timestamp'],
             latitude = vec['Latitude'],
             longitude = vec['Longitude'],
@@ -223,7 +223,7 @@ def scrape(vehicle_line):
 
         columns = ', '.join(vec_parse.keys())
         placeholders = ', '.join('?' * len(vec_parse))
-        sql = 'INSERT INTO busses ({}) VALUES ({})'.format(columns, placeholders)
+        sql = 'INSERT INTO vehicles ({}) VALUES ({})'.format(columns, placeholders)
         c.execute(sql, tuple(vec_parse.values()))
 
         conn.commit()
@@ -251,7 +251,7 @@ if __name__ == '__main__':
         while True:
             for station_line in station_lines:
                 scrape(station_line)
-                time.sleep(2)
+                time.sleep(10)
     except KeyboardInterrupt:
         print('KeyboardInterrupt detected. Cleaning up and exiting...')
         conn.close()
