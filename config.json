@@ -1,0 +1,45 @@
+[
+    {
+        "vehicle_url": "https://www3.vvs.de/mnghnv/VELOC?",
+        "vehicle_params": {
+            "CoordSystem": "WGS84",
+            "LineID": "",
+            "coordOutputFormat": "EPSG:4326",
+            "outputFormat": "rapidJSON",
+            "serverInfo": "1"
+        },
+        "vehicle_interval": 5
+    },
+    {
+        "station_url": "https://www3.vvs.de/mnghnv/XML_GEOOBJECT_REQUEST?",
+        "station_version": "6",
+        "station_params": {
+            "SpEncId": "0",
+            "lineID": "",
+            "outputFormat": "rapidJSON",
+            "serverInfo": "1",
+            "coordOutputFormat": "EPSG:4326",
+            "spTZO": "1",
+            "stFaZon": "1",
+            "vSL": "1",
+            "version": "10.2.10.139"
+        }
+    },
+    {
+        "timetable_url": "https://www3.vvs.de/mnghnv/XML_DM_REQUEST?",
+        "timetable_params": {
+            "SpEncId": "0",
+            "mode": "direct",
+            "name_dm": "",
+            "outputFormat": "rapidJSON",
+            "type_dm": "stop",
+            "useRealtime": "0",
+            "coordOutputFormat": "EPSG:4326",
+            "limit": "40",
+            "version": "10.2.10.139",
+            "itdDateDay": "",
+            "itdTime": "",
+            "useProxFootSearch": "0"
+        }
+    }
+]
