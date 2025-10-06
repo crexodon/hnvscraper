@@ -1,9 +1,12 @@
 import sqlite3, requests 
 import re, urllib.parse
 import time, sys, json
+import threading
 
-lines = json.load('lines.json')
-config = json.load('config.json')
+with open('lines.json') as f:
+    lines = json.load(f)
+with open('config.json') as f:
+    config = json.load(f)
 
 # Compiled RegEx for StationID Lookup
 stop_reg = re.compile(r'^.*?(?=#)')
@@ -271,4 +274,19 @@ def access_data():
 
     return rets
 
-def scrape()
+def scrape():
+    while True:
+        for line in lines:
+            scrape(line)
+            time.sleep(3)
+    
+    
+def scrape_init():
+    create_database()
+    for line in lines:
+        print('Getting Station Info for: ' + line)
+        get_stations(line)
+        time.sleep(5)
+
+    t = threading.Thread(target=scrape)
+    t.start()

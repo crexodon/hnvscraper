@@ -1,5 +1,5 @@
-[
-    {
+{
+    "vehicle_config": {
         "vehicle_url": "https://www3.vvs.de/mnghnv/VELOC?",
         "vehicle_params": {
             "CoordSystem": "WGS84",
@@ -10,9 +10,8 @@
         },
         "vehicle_interval": 5
     },
-    {
+    "station_config": {
         "station_url": "https://www3.vvs.de/mnghnv/XML_GEOOBJECT_REQUEST?",
-        "station_version": "6",
         "station_params": {
             "SpEncId": "0",
             "lineID": "",
@@ -25,7 +24,7 @@
             "version": "10.2.10.139"
         }
     },
-    {
+    "timetable_config": {
         "timetable_url": "https://www3.vvs.de/mnghnv/XML_DM_REQUEST?",
         "timetable_params": {
             "SpEncId": "0",
@@ -42,4 +41,4 @@
             "useProxFootSearch": "0"
         }
     }
-]
+}
