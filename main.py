@@ -1,4 +1,4 @@
-from flask import Flask, render_template_string
+from flask import Flask, render_template
 import scraper
 
 import folium
@@ -6,29 +6,34 @@ from folium.plugins import Realtime
 
 app = Flask(__name__)
 
+# @app.__init__
+# def init_app():
+#     print('Setting up Scraper...')
+#     scraper.scrape_init()
+
 @app.route("/")
 def site():
     """Embed a map as an iframe on a page."""
-    m = folium.Map(location=(49.126131, 9.270954), tiles="Cartodb Positron", zoom_start=12)
+    m = folium.Map(location=(49.142509, 9.208628), tiles="Cartodb Positron", zoom_start=13)
 
+    vehicles = scraper.access_vehicles()
+
+    print(vehicles)
+
+    for vehicle in vehicles:
+        float_location = [float(vehicle['geojson']['coordinates'][1]), float(vehicle['geojson']['coordinates'][0])]
+        popup_string = vehicle['line_number'] + ' ' + vehicle['line_name']
+        print(float_location)
+        folium.Marker(location=float_location, popup=popup_string).add_to(m)
+    
     # set the iframe width and height
     m.get_root().width = "800px"
     m.get_root().height = "600px"
     iframe = m.get_root()._repr_html_()
 
-    return render_template_string(
-        """
-            <!DOCTYPE html>
-            <html>
-                <head></head>
-                <body>
-                    <h1>HNV Scraper</h1>
-                    {{ iframe|safe }}
-                </body>
-            </html>
-        """,
-        iframe=iframe,
-    )
+    
+
+    return render_template('template.html',iframe=iframe)
 
 # @app.route('/api', methods=['GET'])
 # def api():

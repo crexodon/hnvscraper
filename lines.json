@@ -14,22 +14,22 @@
         "line_desc": "Flein - Jörg-Ratgeb-Platz - Südbahnhof - Allee Post - HBF Schanz Nord - Frankenbach - Kirchhausen (- Böllinger Höfe)",
         "line_version": "9"
     },
-    "hnv:30061:E:R:j25:9": {
+    "hnv:30061:E:R:j25": {
         "line_number": "61",
         "line_desc": "Böllinger Höfe/Kirchhausen - Frankenbach - Schanz Nord - HBF - Allee Post - Jörg-Ratgeb-Plat - Flein",
         "line_version": "9"
     },
-    "hnv:30062:E:H:j25:7": {
+    "hnv:30062:E:H:j25": {
         "line_number": "62",
         "line_desc": "Flein - Jörg-Ratgeb-Platz - Südbahnhof - Allee Post - HBF - Schanz Nord - Böllinger Höfe",
         "line_version": "7"
     },
-    "hnv:30064:E:H:j25:4": {
+    "hnv:30064:E:H:j25": {
         "line_number": "64",
         "line_desc": "Flein - Hochschule Heilbronn - Südbahnhof - Allee Post - HBF",
         "line_version": "4"
     },
-    "hnv:30064:E:R:j25:4": {
+    "hnv:30064:E:R:j25": {
         "line_number": "64",
         "line_desc": "HBF - Allee Post - Südbahnhof - Hochschule Heilbronn - Flein",
         "line_version": "4"

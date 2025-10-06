@@ -14,7 +14,7 @@
         "station_url": "https://www3.vvs.de/mnghnv/XML_GEOOBJECT_REQUEST?",
         "station_params": {
             "SpEncId": "0",
-            "lineID": "",
+            "line": "",
             "outputFormat": "rapidJSON",
             "serverInfo": "1",
             "coordOutputFormat": "EPSG:4326",

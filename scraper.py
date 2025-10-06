@@ -68,7 +68,7 @@ def create_database():
 # Only call this once, populates db with all possible stations from given line
 def get_stations(line):
     station_config = config['station_config']
-    station_config['station_params']['lineID'] = line + lines.get(line,)['line_version']
+    station_config['station_params']['line'] = line + ':' + lines.get(line,)['line_version']
     
     station_params_str = urllib.parse.urlencode(station_config['station_params'], safe=':')
     try:
@@ -97,7 +97,6 @@ def get_stations(line):
             stop_id = station['parent']['properties']['stopId'],
             validity_from = data['transportations'][0]['properties']['validity']['from'],
             validity_to = data['transportations'][0]['properties']['validity']['to'],
-            #line_id = data['transportations'][0]['id']
             line_id = line
         ) 
 
@@ -111,31 +110,6 @@ def get_stations(line):
         conn.commit()
     
     conn.close()
-
-# TODO Needs further adjustment, Weekday, Saturday, Sun and Holiday timetables            
-# def get_timetables(station_id):
-#     timetable_params['name_dm'] = station_id
-#     timetable_params_str = urllib.parse.urlencode(timetable_params, safe=':')
-#     resp = requests.get(url=timetable_url, params=timetable_params_str)
-#     data: dict = resp.json()
-
-#     times = data['stopEvents']
-#     for time in times:
-
-#         hints = []
-#         if('hints' in time):
-#             hints = time['hints']
-
-#         time_parse = dict(
-#             station_id = time['location']['id'],
-#             stop_id = time['location']['properties']['stopId'],
-#             timetable_timestamp = time['departureTimeBaseTimetable'],
-#             departure = time['departureTimePlanned'],
-#             line_id = time['transportation']['id'],
-#             hints = hints
-#         )
-
-#         print(dict(time_parse))
 
 # Transforms Line ID from Scrape to Station format and also the other way
 # TODO Add catch when transforming lineid from get_station request, the raw output adds the line_version to the end of the line_id!
@@ -187,18 +161,19 @@ def get_vehicles(line):
     
     vehicle_params_str = urllib.parse.urlencode(vehicle_config['vehicle_params'], safe=':')
     try:
-        resp = requests.get(url=vehicle_config['station_url'], params=vehicle_params_str)
+        resp = requests.get(url=vehicle_config['vehicle_url'], params=vehicle_params_str)
         resp.raise_for_status()
     except requests.exceptions.HTTPError as err:
         print('ERROR while GET: ' + str(err))
     except requests.exceptions.RequestException as err:
         print('ERROR while GET: ' + str(err))
+    
+    if not resp:
+        return
 
     data = resp.json()
 
     conn = sqlite3.connect('scraped.db')
-
-    last_vecs.clear()
 
     # TODO Add more robust keyhandling incase of bad data
     for vec in data:
@@ -217,7 +192,7 @@ def get_vehicles(line):
             bus_journey = vec['DirectionText']
         )
 
-        last_vecs.append(vec_parse)
+        last_vecs.append((vec_parse['trip_id'], vec_parse['bus_timestamp']))
 
         c = conn.cursor()
 
@@ -228,13 +203,14 @@ def get_vehicles(line):
         c.execute(sql, tuple(vec_parse.values()))
 
         conn.commit()
-    
     conn.close()
+
+    return resp.status_code
 
 # I could use the the last_vecs dict directly, however this is for sql demonstration
 # Later on this can be used to access historical data from the database!
 # Returns list of data with geojson point, timestamp, current and next stop (parsed) and line info
-def access_data():
+def access_vehicles():
     conn = sqlite3.connect('scraped.db')
 
     c = conn.cursor()
@@ -274,19 +250,38 @@ def access_data():
 
     return rets
 
-def scrape():
+# TODO Add function to access stations for frontend
+# def access_stations():
+#     conn = sqlite3.connect('scraped.db')
+
+#     c = conn.cursor()
+    
+#     select_query = """SELECT latitude, longitude, name FROM stations WHERE line_id = (?)"""
+#     rets = []
+
+#     for line in lines:
+        
+    
+#     return rets
+
+def scrape_run():
+    print("Starting Scraper Thread...")
     while True:
         for line in lines:
-            scrape(line)
+            ret = get_vehicles(line)
+            print('Scraping ' + str(line) + ' > ' + str(ret))
             time.sleep(3)
+        last_vecs.clear()
+        
     
     
 def scrape_init():
+    print("Starting Scraper Init...")
     create_database()
-    for line in lines:
-        print('Getting Station Info for: ' + line)
-        get_stations(line)
-        time.sleep(5)
+    # for line in lines:
+    #     print('Getting Station Info for: ' + line)
+    #     get_stations(line)
+    #     time.sleep(2)
 
-    t = threading.Thread(target=scrape)
+    t = threading.Thread(target=scrape_run)
     t.start()
