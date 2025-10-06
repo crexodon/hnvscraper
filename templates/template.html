@@ -2,8 +2,14 @@
 <html>
 <head></head>
 <body>
-    <h1>HNV Scraper</h1>
-    {{ iframe|safe }}
-    <h3>Live Data:</h3>
+<h1>HNV Scraper</h1>
+{{ iframe|safe }}
+<h3>Live Data:</h3>
+{% for dict_item in vehicles %}
+    <h4>{{dict_item.get('line_number',)}}: {{dict_item.get('line_name',)}}</h4>
+    {% for key, value in dict_item.items() %}
+        - {{key}}: {{value}}<br>
+    {% endfor %}
+{% endfor %}
 </body>
 </html>

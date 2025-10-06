@@ -11,9 +11,6 @@ with open('config.json') as f:
 # Compiled RegEx for StationID Lookup
 stop_reg = re.compile(r'^.*?(?=#)')
 
-# Stores last access vehicles from get_vehicles. Used by frontend
-last_vecs = []
-
 def create_database():
     conn = sqlite3.connect('scraped.db')
     c = conn.cursor()
@@ -23,15 +20,16 @@ def create_database():
                  line_id TEXT,
                  trip_id TEXT,
                  get_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                 bus_timestamp TIMESTAMP,
+                 vehicle_timestamp TIMESTAMP,
                  latitude TEXT,
                  longitude TEXT,
                  current_stop TEXT,
                  next_stop TEXT,
                  realtime_available BOOLEAN DEFAULT FALSE,
                  current_delay INTEGER,
-                 bus_name TEXT,
-                 bus_journey TEXT)''')
+                 vehicle_name TEXT,
+                 vehicle_journey TEXT,
+                 vehicle_type TEXT)''')
     conn.commit()
 
     #stop_id 5400034
@@ -181,18 +179,17 @@ def get_vehicles(line):
         vec_parse = dict(
             line_id = line,
             trip_id = vec['JourneyIdentifier'],
-            bus_timestamp = vec['Timestamp'],
+            vehicle_timestamp = vec['Timestamp'],
             latitude = vec['Latitude'],
             longitude = vec['Longitude'],
             current_stop = stop_reg.match(vec['CurrentStop']).group(),
             next_stop = stop_reg.match(vec['NextStop']).group(),
             realtime_available = vec['RealtimeAvailable'],
             current_delay = vec['Delay'],
-            bus_name = vec['LineText'],
-            bus_journey = vec['DirectionText']
+            vehicle_name = vec['LineText'],
+            vehicle_journey = vec['DirectionText'],
+            vehicle_type = vec['MOTCode']
         )
-
-        last_vecs.append((vec_parse['trip_id'], vec_parse['bus_timestamp']))
 
         c = conn.cursor()
 
@@ -215,36 +212,43 @@ def access_vehicles():
 
     c = conn.cursor()
 
-    select_query = """SELECT latitude, longitude, bus_timestamp, current_stop, next_stop, realtime_available, current_delay, bus_name, bus_journey FROM vehicles WHERE trip_id = (?) AND bus_timestamp = (?);"""
+    select_query = """SELECT latitude, longitude, vehicle_timestamp, current_stop, next_stop, realtime_available, current_delay, vehicle_name, vehicle_journey, vehicle_type, get_timestamp 
+                      FROM vehicles 
+                      WHERE get_timestamp = (SELECT MAX(get_timestamp) FROM vehicles WHERE line_id = (?));"""
     rets = []
-    for last_vec in last_vecs:
-        c.execute(select_query, last_vec)
+    for line in lines:
+        c.execute(select_query, (line, ))
         ret = c.fetchall()
 
-        c.execute("""SELECT name FROM stations WHERE stop_id = (?)""", (ret[0][3], ))
-        cur_stop = c.fetchall()
+        print('Fetched ' + str(len(ret)) + ' vehicles on line: ' + str(line))
 
-        c.execute("""SELECT name FROM stations WHERE stop_id = (?)""", (ret[0][4], ))
-        nxt_stop = c.fetchall()
-        
-        ret_parse = dict(
-            geojson = dict(
-                type = "Point",
-                coordinates = [
-                    ret[0][1],
-                    ret[0][0]
-                ]
-            ),
-            timestamp = ret[0][2],
-            current_stop = cur_stop[0][0],
-            next_stop = nxt_stop[0][0],
-            realtime_available = str(ret[0][5]),
-            realtime_delay = str(ret[0][6]),
-            line_number = ret[0][7],
-            line_name = ret[0][8]
-        )
+        for vehicle in ret:
+            c.execute("""SELECT name FROM stations WHERE stop_id = (?)""", (vehicle[3], ))
+            cur_stop = c.fetchone()
 
-        rets.append(ret_parse)
+            c.execute("""SELECT name FROM stations WHERE stop_id = (?)""", (vehicle[4], ))
+            nxt_stop = c.fetchone()
+            
+            ret_parse = dict(
+                geojson = dict(
+                    type = "Point",
+                    coordinates = [
+                        vehicle[1],
+                        vehicle[0]
+                    ]
+                ),
+                vehicle_timestamp = vehicle[2],
+                current_stop = cur_stop[0],
+                next_stop = nxt_stop[0],
+                realtime_available = 'yes' if vehicle[5] == 1 else 'no',
+                realtime_delay = str(vehicle[6]) + 's',
+                line_number = vehicle[7],
+                line_name = vehicle[8],
+                line_type = vehicle[9],
+                get_timestamp = vehicle[10]
+            )
+
+            rets.append(ret_parse)
     
     conn.close()
 
@@ -271,7 +275,6 @@ def scrape_run():
             ret = get_vehicles(line)
             print('Scraping ' + str(line) + ' > ' + str(ret))
             time.sleep(3)
-        last_vecs.clear()
         
     
     
